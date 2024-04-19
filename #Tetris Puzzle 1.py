@@ -13,7 +13,7 @@ colors = [
 class Figure:
     x = 0
     y = 0
-
+#DFEFF
     #The first block is one rotation and the other another, so for I there is only 2 possibilities but for there are multiple
     figures = [
         [[1, 5, 9, 13], [4, 5, 6, 7]], # I shape
