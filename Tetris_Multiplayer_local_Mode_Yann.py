@@ -7,12 +7,13 @@ import random
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+
 #So here we are choosing the colors for our game
 
 # Define controls for two players
 player_controls = {
     1: {'rotate': pygame.K_UP, 'down': pygame.K_DOWN, 'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'drop': pygame.K_SPACE},
-    2: {'rotate': pygame.K_w, 'down': pygame.K_s, 'left': pygame.K_a, 'right': pygame.K_d, 'drop': pygame.K_q}  # Using 'q' for drop as an example
+    2: {'rotate': pygame.K_w, 'down': pygame.K_s, 'left': pygame.K_a, 'right': pygame.K_d, 'drop': pygame.K_q} 
 }
 
 
@@ -366,9 +367,9 @@ def main():
         screen.blit(score2_text, (screen.get_width() - score2_text.get_width() - 10, 10))  # Player 2 score on the right
 
         if game.state == "gameover":
-            font1 = pygame.font.SysFont('Calibri', 65, True, False)
-            text_game_over = font1.render("Game Over", True, (255, 125, 0))
-            text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
+            font1 = pygame.font.SysFont('Calibri', 60, True, BLACK,)
+            text_game_over = font1.render("Game Over", True, BLACK, )
+            text_game_over1 = font1.render("Press esc & restart", True, BLACK,)
             screen.blit(text_game_over, [20, 100])
             screen.blit(text_game_over1, [25, 265])
 

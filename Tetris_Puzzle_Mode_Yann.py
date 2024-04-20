@@ -67,7 +67,7 @@ class Tetris:
         self.target_grid_height = 20  # Height of the target grid in blocks
 
         self.level_configurations = {
-            1: {'pieces': [(0, 0),(0, 0),(0, 0),(0, 0),(0, 0)], 'target_pattern': self.generate_target_pattern(1)}, #Here we generate the O figure
+            1: {'pieces': [(0, 0),(0, 0),(0, 0),(0, 0),(0, 0)], 'target_pattern': self.generate_target_pattern(1)}, #Here we generate the square figure
             2: {'pieces': [(6, 0), (6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0)], 'target_pattern': self.generate_target_pattern(2)}, #The Chirstimas Tree
             3: {'pieces': [(5, 0),(2, 0),(1, 0),(5, 0),(5, 0),(4, 0),(3, 0),(4, 0),(3, 0)], 'target_pattern': self.generate_target_pattern(3)}, #Heart pattern
             4: {'pieces': [(3, 0),(4, 0),(3, 0),(4, 0),(3, 0),(4, 0),(3,0)], 'target_pattern': self.generate_target_pattern(4)}, 

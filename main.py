@@ -58,15 +58,23 @@ pygame.display.set_caption('Tetris Game Modes')
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+# Define font for the title
+title_font = pygame.font.SysFont('Calibri', 40)
+
 # Create buttons
 puzzle_button = Button("Puzzle Mode", 100, 200, 200, 50, run_puzzle_mode)
 color_button = Button("Color Mode", 500, 200, 200, 50, run_color_mode)
-multiplayer_button = Button("Multiplayer Mode", 300, 300, 250, 50, run_multiplayer_mode)  
+multiplayer_button = Button("Local Multiplayer Mode", 250, 300, 350, 50, run_multiplayer_mode)  
 
 # Main loop
 running = True
 while running:
     screen.fill(WHITE)  # Clear the screen
+
+        # Draw the title
+    title_surface = title_font.render('Click on a Game Mode to play', True, BLACK)
+    title_rect = title_surface.get_rect(center=(screen_size[0] // 2, 100))
+    screen.blit(title_surface, title_rect)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
