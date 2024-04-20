@@ -3,6 +3,11 @@
 import pygame
 import random
 
+# Define color constants for easy reference
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+
 #So here we are choosing the colors for our game
 
 colors = [
@@ -13,7 +18,7 @@ colors = [
 class Figure:
     x = 0
     y = 0
-#DFEFF
+
     #The first block is one rotation and the other another, so for I there is only 2 possibilities but for there are multiple
     figures = [
         [[1, 5, 9, 13], [4, 5, 6, 7]], # I shape
@@ -65,8 +70,8 @@ class Tetris:
             1: {'pieces': [(0, 0),(0, 0),(0, 0),(0, 0),(0, 0)], 'target_pattern': self.generate_target_pattern(1)}, #Here we generate the O figure
             2: {'pieces': [(6, 0), (6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0),(6, 0)], 'target_pattern': self.generate_target_pattern(2)}, #The Chirstimas Tree
             3: {'pieces': [(5, 0),(2, 0),(1, 0),(5, 0),(5, 0),(4, 0),(3, 0),(4, 0),(3, 0)], 'target_pattern': self.generate_target_pattern(3)}, #Heart pattern
-            4: {'pieces': [[(3, 0),(4, 0),(3, 0),(4, 0),(3, 0),(4, 0),(3, ], 'target_pattern': self.generate_target_pattern(4)}, 
-            5: {'pieces': [[(3, 0),(4, 0),(3, 0),(4, 0),(3, 0),(4, 0),(3, ], 'target_pattern': self.generate_target_pattern(5)}, 
+            4: {'pieces': [(3, 0),(4, 0),(3, 0),(4, 0),(3, 0),(4, 0),(3,0)], 'target_pattern': self.generate_target_pattern(4)}, 
+            5: {'pieces': [(3, 0),(4, 0),(3, 0),(4, 0),(3, 0),(4, 0),(3,0)], 'target_pattern': self.generate_target_pattern(5)}, 
         }
         self.load_level(self.level)
 
@@ -75,6 +80,7 @@ class Tetris:
     def load_level(self, level):
         # Reset the playing field
         self.field = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        
         
         config = self.level_configurations[level]
         self.next_figures = [Figure(3, 0, type=p[0], rotation=p[1]) for p in config['pieces']]
@@ -186,7 +192,7 @@ class Tetris:
                 [0, 0, 0, 0, 0, 0, 0, 1, 1, 1], #L shape
             ]
 
-            elif level == 5:
+        elif level == 5:
             # If you ve come to here and if you enjoyed the game feel free to give me a 6 :)
                 pattern = [
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -287,7 +293,7 @@ class Tetris:
 
         # Draw each next piece vertically stacked
         next_pieces_y = box_y + 40  # Adjust spacing from the top of the box
-        for next_piece in self.next_figures:
+        for next_piece in self.next_figures[:3]:
             # Find the min and max x indices of the blocks for the current piece to center it
             block_indices = [index % 4 for index in next_piece.image()]  # Get only the x indices of blocks
             min_x = min(block_indices)
@@ -394,122 +400,127 @@ class Tetris:
             self.figure.rotation = old_rotation
 
 
+# Define a main function that will run the game
+def main():
 
-# Import necessary Pygame library
-import pygame
+    # Import necessary Pygame library
+    import pygame
 
-# Initialize the Pygame engine
-pygame.init()
+    # Initialize the Pygame engine
+    pygame.init()
 
-# Define color constants for easy reference
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GRAY = (128, 128, 128)
+    # Define color constants for easy reference
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    GRAY = (128, 128, 128)
 
-# Set the size of the window or screen for the game
-screen_size = (800, 600)
-screen = pygame.display.set_mode(screen_size)
+    # Set the size of the window or screen for the game
+    screen_size = (800, 600)
+    screen = pygame.display.set_mode(screen_size)
 
-# Set the title of the window
-pygame.display.set_caption("Tetris")
+    # Set the title of the window
+    pygame.display.set_caption("Tetris")
 
-# Flag to keep track of whether the game loop should continue
-done = False
+    # Flag to keep track of whether the game loop should continue
+    done = False
 
-# Create a clock object to manage how fast the screen updates
-clock = pygame.time.Clock()
+    # Create a clock object to manage how fast the screen updates
+    clock = pygame.time.Clock()
 
-# Define frames per second: how many times the game updates per second
-fps = 30
+    # Define frames per second: how many times the game updates per second
+    fps = 30
 
-game = Tetris(20, 10)
-counter = 0
+    game = Tetris(20, 10)
+    counter = 0
 
-# Boolean to check if the down key is being pressed
-pressing_down = False
+    # Boolean to check if the down key is being pressed
+    pressing_down = False
 
-# Main game loop
-while not done:
-    # Check and create a new tetromino if needed
-    if game.figure is None:
-        game.new_figure()
+    # Main game loop
+    while not done:
+        # Check and create a new tetromino if needed
+        if game.figure is None:
+            game.new_figure()
 
-    # Manage the frame counter for timing events
-    counter += 1
-    if counter > 100000:  # Prevent overflow for performance
-        counter = 0
+        # Manage the frame counter for timing events
+        counter += 1
+        if counter > 100000:  # Prevent overflow for performance
+            counter = 0
 
-    # Calculate how frequently the tetromino should move down based on game level
-    movement_frequency = fps // game.level // 2
+        # Calculate how frequently the tetromino should move down based on game level
+        movement_frequency = fps // game.level // 2
 
-    # Move the tetromino down based on timing or player action
-    if counter % movement_frequency == 0 or pressing_down:
-        if game.state == "start":
-            game.go_down()
+        # Move the tetromino down based on timing or player action
+        if counter % movement_frequency == 0 or pressing_down:
+            if game.state == "start":
+                game.go_down()
 
-    # Event handling loop
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                game.rotate()
-            elif event.key == pygame.K_DOWN:
-                pressing_down = True
-            elif event.key == pygame.K_LEFT:
-                game.go_side(-1)
-            elif event.key == pygame.K_RIGHT:
-                game.go_side(1)
-            elif event.key == pygame.K_SPACE:
-                game.go_space()
-            elif event.key == pygame.K_ESCAPE:
-                game.__init__(20, 10)  # Reset game
+        # Event handling loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    game.rotate()
+                elif event.key == pygame.K_DOWN:
+                    pressing_down = True
+                elif event.key == pygame.K_LEFT:
+                    game.go_side(-1)
+                elif event.key == pygame.K_RIGHT:
+                    game.go_side(1)
+                elif event.key == pygame.K_SPACE:
+                    game.go_space()
+                elif event.key == pygame.K_ESCAPE:
+                    game.__init__(20, 10)  # Reset game
 
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
-        
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_DOWN:
+                    pressing_down = False
+            
 
-    # Draw the game board
-    screen.fill(WHITE)
-    for i in range(game.height):
-        for j in range(game.width):
-            pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
-            if game.field[i][j] > 0:
-                pygame.draw.rect(screen, colors[game.field[i][j]],
-                                 [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
+        # Draw the game board
+        screen.fill(WHITE)
+        for i in range(game.height):
+            for j in range(game.width):
+                pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
+                if game.field[i][j] > 0:
+                    pygame.draw.rect(screen, colors[game.field[i][j]],
+                                    [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 
-    # Draw the active tetromino
-    if game.figure is not None:
-        for i in range(4):
-            for j in range(4):
-                p = i * 4 + j
-                if p in game.figure.image():
-                    pygame.draw.rect(screen, colors[game.figure.color],
-                                     [game.x + game.zoom * (j + game.figure.x) + 1,
-                                      game.y + game.zoom * (i + game.figure.y) + 1,
-                                      game.zoom - 2, game.zoom - 2])
-                    
-    game.draw_next_pieces(screen)
-    # Display score and game over messages
-    font = pygame.font.SysFont('Calibri', 25, True, False)
-    text = font.render("Score: " + str(game.score), True, BLACK)
-    screen.blit(text, [0, 0])
+        # Draw the active tetromino
+        if game.figure is not None:
+            for i in range(4):
+                for j in range(4):
+                    p = i * 4 + j
+                    if p in game.figure.image():
+                        pygame.draw.rect(screen, colors[game.figure.color],
+                                        [game.x + game.zoom * (j + game.figure.x) + 1,
+                                        game.y + game.zoom * (i + game.figure.y) + 1,
+                                        game.zoom - 2, game.zoom - 2])
+                        
+        game.draw_next_pieces(screen)
+        # Display score and game over messages
+        font = pygame.font.SysFont('Calibri', 25, True, False)
+        text = font.render("Level: " + str(game.score), True, BLACK)
+        screen.blit(text, [0, 0])
 
-    if game.state == "gameover":
-        font1 = pygame.font.SysFont('Calibri', 60, True, BLACK,)
-        text_game_over = font1.render("Game Over", True, BLACK, )
-        text_game_over1 = font1.render("Press esc & restart", True, BLACK,)
-        screen.blit(text_game_over, [20, 100])
-        screen.blit(text_game_over1, [25, 265])
+        if game.state == "gameover":
+            font1 = pygame.font.SysFont('Calibri', 60, True, BLACK,)
+            text_game_over = font1.render("Game Over", True, BLACK, )
+            text_game_over1 = font1.render("Press esc & restart", True, BLACK,)
+            screen.blit(text_game_over, [20, 100])
+            screen.blit(text_game_over1, [25, 265])
 
-    # Draw the target grid
-    game.draw_target_grid(screen)
+        # Draw the target grid
+        game.draw_target_grid(screen)
 
-    # Update the display and maintain frame rate
-    pygame.display.flip()
-    clock.tick(fps)
+        # Update the display and maintain frame rate
+        pygame.display.flip()
+        clock.tick(fps)
 
-# Quit Pygame
-pygame.quit()
+    # Quit Pygame
+    pygame.quit()
 
+# This allows the script to be run as a standalone game as well
+if __name__ == "__main__":
+    main()
