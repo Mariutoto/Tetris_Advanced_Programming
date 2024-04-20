@@ -4,6 +4,8 @@ import sys
 # Import everything from the game mode files
 from Tetris_Puzzle_Mode_Yann import main as puzzle_main
 from Tetris_Color_Mode_Yann import main as color_main
+from Tetris_Multiplayer_local_Mode_Yann import main as multiplayer_main
+
 
 # Define the button class
 class Button:
@@ -31,12 +33,18 @@ class Button:
         if self.rect.collidepoint(position):
             self.callback_function()
 
+
+
 # Define game mode functions
 def run_puzzle_mode():
     puzzle_main()
 
 def run_color_mode():
     color_main()
+
+# Define game mode functions
+def run_multiplayer_mode():
+    multiplayer_main()
 
 # Initialize Pygame
 pygame.init()
@@ -51,8 +59,9 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 # Create buttons
-puzzle_button = Button("Puzzle Mode", 100, 250, 200, 50, run_puzzle_mode)
-color_button = Button("Color Mode", 500, 250, 200, 50, run_color_mode)
+puzzle_button = Button("Puzzle Mode", 100, 200, 200, 50, run_puzzle_mode)
+color_button = Button("Color Mode", 500, 200, 200, 50, run_color_mode)
+multiplayer_button = Button("Multiplayer Mode", 300, 300, 250, 50, run_multiplayer_mode)  
 
 # Main loop
 running = True
@@ -67,10 +76,13 @@ while running:
                 puzzle_button.check_click(event.pos)
             elif color_button.rect.collidepoint(event.pos):
                 color_button.check_click(event.pos)
+            elif multiplayer_button.rect.collidepoint(event.pos):  # Add this check for the multiplayer button
+                multiplayer_button.check_click(event.pos)
 
     # Draw buttons
     puzzle_button.draw(screen)
     color_button.draw(screen)
+    multiplayer_button.draw(screen)  # You need to draw the multiplayer button
 
     pygame.display.flip()  # Update the display
 

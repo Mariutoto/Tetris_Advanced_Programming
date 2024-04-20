@@ -1,4 +1,4 @@
-#Tetris game
+#Multiplayer local mode Yann
 
 import pygame
 import random
@@ -9,21 +9,22 @@ WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 #So here we are choosing the colors for our game
 
-colors = [
+# Define controls for two players
+player_controls = {
+    1: {'rotate': pygame.K_UP, 'down': pygame.K_DOWN, 'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'drop': pygame.K_SPACE},
+    2: {'rotate': pygame.K_w, 'down': pygame.K_s, 'left': pygame.K_a, 'right': pygame.K_d, 'drop': pygame.K_q}  # Using 'q' for drop as an example
+}
+
+
+colors = [ 
     (180, 34, 22),    # Red
     (180, 34, 122),   # Pink
-    (0, 0, 0),        # Black (generally used for background or empty spaces)
+    (0, 0, 0),        # Black
     (80, 34, 22),     # Brown
     (120, 37, 179),   # Purple
     (100, 179, 179),  # Cyan
     (80, 134, 22),    # Green
-    (255, 165, 0),    # Orange (Distinct from red and brown)
-    (255, 255, 0),    # Yellow (Bright and highly visible)
-    (0, 128, 128),    # Teal (Contrasts well with cyan and blue)
-    (255, 20, 147),   # Deep Pink (Stands out from purple and red)
-    (75, 0, 130)      # Indigo (Different enough from deep blues and purples)
 ]
-
 
 class Figure:
     x = 0
@@ -58,21 +59,39 @@ class Figure:
 
 class Tetris:
     def __init__(self, height, width):
+        self.current_player = 1 # Start with player 1
         self.level = 1
         self.score = 0
         self.state = "start"
         self.x = 100  # To center the grid on the x-axis on the Pygame window
-        self.y = 30   # To center the grid on the y-axis on the Pygame window
+        self.y = 100   # To center the grid on the y-axis on the Pygame window
         self.zoom = 20  # The size of each Tetris block
         self.figure = None
         self.next_figures = [Figure(3, 0) for _ in range(3)]  # Initialize list of next pieces
         self.height = height  # The number of rows in the Tetris field
         self.width = width    # The number of columns in the Tetris field
         self.field = [[0 for _ in range(width)] for _ in range(height)]  # Initialize the playing field
+        self.scores = {1: 0, 2: 0}  # Dictionary to hold scores for each player
+
+    def switch_player(self):
+        self.current_player = 1 if self.current_player == 2 else 2
 
     def new_figure(self):
         self.figure = self.next_figures.pop(0)  # Get the next piece from the list
         self.next_figures.append(Figure(3, 0))  # Add a new piece to the list
+        self.switch_player()  # Switch player after a new figure is spawned
+
+
+    def process_key(self, key):
+        controls = player_controls[self.current_player]
+        if key == controls['rotate']:
+            self.rotate()
+        elif key == controls['down']:
+            self.go_down()
+        elif key == controls['left']:
+            self.go_side(-1)
+        elif key == controls['right']:
+            self.go_side(1)
 
     def draw_next_pieces(self, screen):
         # Calculate the position and size of the box for next pieces
@@ -139,21 +158,17 @@ class Tetris:
         
         # Iterate through each row in the game field
         for row in range(self.height):
-            # Check if all blocks in the row are filled (none are zero)
-            if all(self.field[row][col] != 0 for col in range(self.width)):
-                # Increment the count of lines cleared
+            if all(self.field[row][col] != 0 for col in range(self.width)):  # Check if row is completely filled
                 lines_cleared += 1
-                
                 # Move all rows above this one down by one
                 for move_row in range(row, 0, -1):
                     self.field[move_row] = self.field[move_row - 1]
-                
-                # Reset the topmost row to all zeros because there's no row above it
-                self.field[0] = [0] * self.width
-        
-        # Update the score based on the number of lines cleared
-        # The scoring is quadratic, emphasizing clearing multiple lines at once
-        self.score += lines_cleared ** 2
+                self.field[0] = [0] * self.width  # Reset the topmost row
+
+        # Update the score of the current player based on the number of lines cleared
+        # Increment score quadratically to emphasize clearing multiple lines at once
+        if lines_cleared > 0:
+            self.scores[self.current_player] += lines_cleared ** 2
 
 
     def go_space(self):
@@ -180,51 +195,25 @@ class Tetris:
             # Lock the tetromino in place since it cannot move further
             self.freeze()
 
-#problem avec bottom grid pui comment savoir si c est les meme couleurs
 
     def freeze(self):
-        touching_same_color = False
-        positions_to_clear = []  # Store positions of the tetromino to be cleared
-
-        for i in range(4):
+        # Embed the tetromino into the field
+        for i in range(4):  # Tetromino fits within a 4x4 matrix
             for j in range(4):
+                # Check if the cell is part of the tetromino image
                 if i * 4 + j in self.figure.image():
-                    grid_x = j + self.figure.x
-                    grid_y = i + self.figure.y
-                    # Check if block is within grid bounds
-                    if 0 <= grid_y < self.height and 0 <= grid_x < self.width:
-                        positions_to_clear.append((grid_x, grid_y))  # Collect position to potentially clear
-                        # Check adjacent cells for color match
-                        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                            nx, ny = grid_x + dx, grid_y + dy
-                            # Make sure the neighbor is within bounds
-                            if 0 <= ny < self.height and 0 <= nx < self.width:
-                                # Check for same color and that the position is not empty
-                                if self.field[ny][nx] != 0 and self.field[ny][nx] == self.figure.color:
-                                    touching_same_color = True
-                                    break
-                        if touching_same_color:
-                            break
-                if touching_same_color:
-                    break
-
-        # If any part of the tetromino touched another block of the same color, clear all positions
-        if touching_same_color:
-            for x, y in positions_to_clear:
-                self.field[y][x] = 0  # Clear the position
-        else:
-            # Otherwise, lock the tetromino in place
-            for x, y in positions_to_clear:
-                self.field[y][x] = self.figure.color
-            self.break_lines()  # Check and clear any full lines if needed
-
+                    # Set the color of the grid cell to match the tetromino's color
+                    self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
+    
+        # Check and clear any full lines
+        self.break_lines()
+    
         # Spawn a new tetromino
         self.new_figure()
+    
+        # Check if the new figure intersects immediately (game over condition)
         if self.intersects():
             self.state = "gameover"
-
-
-
 
 
     def go_side(self, dx):
@@ -253,8 +242,15 @@ class Tetris:
             self.figure.rotation = old_rotation
 
 
+
 # Import necessary Pygame library
 import pygame
+
+# Define color constants for easy reference
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+
 # Define a main function that will run the game
 def main():
     # Initialize the Pygame engine
@@ -265,12 +261,13 @@ def main():
     WHITE = (255, 255, 255)
     GRAY = (128, 128, 128)
 
+
     # Set the size of the window or screen for the game
-    screen_size = (500, 500)
+    screen_size = (600, 600)
     screen = pygame.display.set_mode(screen_size)
 
     # Set the title of the window
-    pygame.display.set_caption("Tetris")
+    pygame.display.set_caption("Tetris Muliplayer")
 
     # Flag to keep track of whether the game loop should continue
     done = False
@@ -286,7 +283,6 @@ def main():
 
     # Boolean to check if the down key is being pressed
     pressing_down = False
-
 
     # Main game loop
     while not done:
@@ -312,22 +308,28 @@ def main():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                # Fetch the control set for the current player
+                controls = player_controls[game.current_player]
+
+                if event.key == controls['rotate']:
                     game.rotate()
-                elif event.key == pygame.K_DOWN:
-                    pressing_down = True
-                elif event.key == pygame.K_LEFT:
+                elif event.key == controls['down']:
+                    pressing_down = True  # Allow the player to hold down to accelerate the piece
+                elif event.key == controls['left']:
                     game.go_side(-1)
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == controls['right']:
                     game.go_side(1)
-                elif event.key == pygame.K_SPACE:
+                elif event.key == controls['drop']:  # Assuming you map a key for drop like 'space' for both
                     game.go_space()
-                elif event.key == pygame.K_ESCAPE:
-                    game.__init__(20, 10)  # Reset game
+                    game.switch_player()  # Switch the turn after dropping the piece
+
+                if event.key == pygame.K_ESCAPE:
+                    game.__init__(20, 10)  # Reset the game
 
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_DOWN:
-                    pressing_down = False
+                if event.key == controls['down']:
+                    pressing_down = False  # Stop the fast drop when the key is released
+
 
         # Draw the game board
         screen.fill(WHITE)
@@ -348,17 +350,25 @@ def main():
                                         [game.x + game.zoom * (j + game.figure.x) + 1,
                                         game.y + game.zoom * (i + game.figure.y) + 1,
                                         game.zoom - 2, game.zoom - 2])
-                        
+
         game.draw_next_pieces(screen)
-        # Display score and game over messages
+
+        # Display scores for both players
         font = pygame.font.SysFont('Calibri', 25, True, False)
-        text = font.render("Score: " + str(game.score), True, BLACK)
-        screen.blit(text, [0, 0])
+        padding = 20
+        score1_text = font.render(f"Player 1 Score: {game.scores[1]}", True, BLACK)
+        score2_text = font.render(f"Player 2 Score: {game.scores[2]}", True, BLACK)
+        # Calculate positions for the scores so they are not right against the screen edges
+        score1_pos = (padding, padding)  # Add some padding from the top left corner
+        score2_pos = (screen.get_width() - score2_text.get_width() - padding, padding)  # Add some padding from the top right corner
+
+        screen.blit(score1_text, (10, 10))  # Player 1 score on the left
+        screen.blit(score2_text, (screen.get_width() - score2_text.get_width() - 10, 10))  # Player 2 score on the right
 
         if game.state == "gameover":
-            font1 = pygame.font.SysFont('Calibri', 60, True, BLACK,)
-            text_game_over = font1.render("Game Over", True, BLACK, )
-            text_game_over1 = font1.render("Press esc & restart", True, BLACK,)
+            font1 = pygame.font.SysFont('Calibri', 65, True, False)
+            text_game_over = font1.render("Game Over", True, (255, 125, 0))
+            text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
             screen.blit(text_game_over, [20, 100])
             screen.blit(text_game_over1, [25, 265])
 
@@ -369,6 +379,5 @@ def main():
     # Quit Pygame
     pygame.quit()
 
-# This allows the script to be run as a standalone game as well
 if __name__ == "__main__":
     main()
